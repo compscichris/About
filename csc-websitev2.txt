@@ -1,0 +1,82 @@
+wsl -l -v
+//1. CLEANING PREVIOUS WSL UBUNTU INSTALL (optional if want to use another Linux distro)
+wsl --list --verbose
+wsl --unregister <Distro name>  
+wsl --update
+wsl --list --verbose
+wsl –shutdown
+//INSTALLING NEW UBUNTU ON WSL
+wsl --list --online" 
+wsl --install <Distro name>
+//CONFIGURE DISTRO
+sudo apt update && sudo apt upgrade -y
+
+//AFTER CONFIGURING DISTRIBUTION, INSTALL USEFUL VSCODE EXTENSIONS, AND CONFIGURE DOCKER DESKTOP TO USE WSL (FOR MY 
+//ENVIRONMENT) 
+wsl –shutdown
+//RESTART WSL
+
+
+//PIHOLE ISSUE TEMPORARY FIX
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+
+//2. CREATE AND ACTIVATE ENV FOR WEBSITE. (pyenv is convenient and preferrable over reinstalling and compiling 
+//python distribution 3.12.6)
+//WORKAROUND FOR INSTALLING PYTHON VERSION COMPATIBLE FOR PROJECT
+sudo apt install pyenv
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init - bash)"' >> ~/.bashrc
+source ~/.bashrc
+
+//PYTHON 3.12.6 (OR ANY THAT IS COMPATIBLE WITH DJANGO CHANNELS, REDIS, AND DAPHNE IS A HARD REQUIREMENT
+//PYTHON 3.14 BREAKS SOME REDIS VERSIONS
+pyenv install 3.12.6
+pyenv local 3.12.6
+//VERIFY PYTHON IS USING RIGHT ENV
+which python
+python --version
+python3 --version
+which python3
+
+mkdir csc-websitev2
+cd csc-websitev2
+python -m venv .csc-web-env
+source .csc-web-env/bin/activate
+sudo apt install python3-django
+python3 -m django --version
+
+mkdir backend
+mv .csc-web-env backend
+cd backend
+django-admin startproject csc_website
+
+.csc-website/bin/python3 -m pip install channels channels_redis
+.csc-website/bin/python3 -m pip install daphne
+.csc-website/bin/python3 -m pip install whitenoise
+.csc-website/bin/python3 -m pip install djangorestframework
+.csc-website/bin/python3 -m pip install djangorestframework-simplejwt
+.csc-website/bin/python3 -m pip install django-cors-headers
+pip install redis==7.4.0
+python3 -m pip install django-bootstrap4
+
+cd ..
+sudo apt install npm
+npm -v
+npx -v
+npm install react-router-dom jwt-decode axios bootstrap react-bootstrap js-cookie
+
+npx create-react-app frontend
+npm audit -fix
+
+
+//DJANGO SUPER USER
+sudo backend/.csc-website/bin/python3 manage.py createsuperuser
+
+//3. MODIFY HELPER SCRIPTS
+
+git config user.name "compscichris"
+git config user.email "chrischen773@gmail.com"
+git status
+git add --all
+git commit -m "init website"
